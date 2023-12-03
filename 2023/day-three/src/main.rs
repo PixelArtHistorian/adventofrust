@@ -25,8 +25,16 @@ fn solve_day_three_part_two(input_lines: &Vec<String>) -> u32 {
     0
 }
 
+fn parse_engine_specs(engine_specs:&Vec<String>) -> Vec<u32>{
+    let mut part_numbers = Vec::<u32>::new();
+    
+    return part_numbers;
+}
+
 #[cfg(test)]
 mod tests{
+    use std::f32::consts::E;
+
     use super::*;
 
     #[test]
@@ -45,5 +53,44 @@ mod tests{
         ];
         let solution = solve_day_three_part_one(&game);
         assert_eq!(4361, solution);
+    }
+    #[test]
+    fn parse_engine_specs_one_liner_no_parts_numer() {
+        let game = vec![
+            "467..114..".to_string(),
+        ];
+        let expected= Vec::<u32>::new();
+        let parsed_specs = parse_engine_specs(&game);
+        assert_eq!(expected, parsed_specs);
+    }
+    #[test]
+    fn parse_engine_specs_one_liner() {
+        let game = vec![
+            "467.*114..".to_string(),
+        ];
+        let expected=vec![114];
+        let parsed_specs = parse_engine_specs(&game);
+        assert_eq!(expected, parsed_specs);
+    }
+    #[test]
+    fn parse_engine_specs_two_liner() {
+        let game = vec![
+            "467..114..".to_string(),
+            "...*......".to_string(),
+        ];
+        let expected=vec![467];
+        let parsed_specs = parse_engine_specs(&game);
+        assert_eq!(expected, parsed_specs);
+    }
+    #[test]
+    fn parse_engine_specs_three_liner() {
+        let game = vec![
+            "467..114..".to_string(),
+            "...*......".to_string(),
+            "..35..633.".to_string(),
+        ];
+        let expected=vec![467,35];
+        let parsed_specs = parse_engine_specs(&game);
+        assert_eq!(vec![467,35], parsed_specs);
     }
 }
