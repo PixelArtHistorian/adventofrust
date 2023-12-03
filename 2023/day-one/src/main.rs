@@ -26,28 +26,24 @@ fn solve_day_one_part_two(input_lines: &Vec<String>) -> u32 {
 }
 
 fn parse_calibration(line: &str) -> u32 {
-    let mut digits_string = "".to_string();
+    let reverse_line = line.chars().rev().collect::<String>();
+    let mut digits = find_digit(line);
+    digits.push_str(&find_digit(&reverse_line));
+    digits.parse::<u32>().unwrap()
+}
 
-    for char in line.chars() {
+fn find_digit(characters: &str) -> String{
+    let mut digit_string = "".to_string();
+    for char in characters.chars() {
         match char.to_digit(10) {
             Some(_digit) => {
-                digits_string.push(char);
+                digit_string.push(char);
                 break;
             }
             _ => continue,
         }
     }
-    for char in line.chars().rev() {
-        match char.to_digit(10) {
-            Some(_digit) => {
-                digits_string.push(char);
-                break;
-            }
-            _ => continue,
-        }
-    }
-
-    digits_string.parse::<u32>().unwrap()
+    return digit_string;
 }
 
 #[cfg(test)]
