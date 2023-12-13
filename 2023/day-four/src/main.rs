@@ -23,7 +23,8 @@ fn read_input(path: &Path) -> Result<Vec<String>, String> {
 fn solve_day_four_part_one(input_lines: &Vec<String>) -> u32 {
     input_lines
         .iter()
-        .map(|c| compute_card_points(c).points)
+        .filter_map(|c| compute_card_points(c))
+        .map(|card| card.points)
         .sum()
 }
 
@@ -31,50 +32,50 @@ fn solve_day_four_part_two(input_lines: &Vec<String>) -> u32 {
     0
 }
 
-fn compute_card_points(card: &String) -> Card {
+fn compute_card_points(card: &String) -> Option<Card> {
     let points_pattern =
-        Regex::new(r"Card\s(?P<card_number>\d+):\s*(?P<before>[\d\s]+)\s*\|\s*(?P<after>[\d\s]+)")
+        Regex::new(r"Card\s+(?P<card_number>\d+):\s*(?P<before>[\d\s]+)\s*\|\s*(?P<after>[\d\s]+)")
             .unwrap();
+
     let caps = points_pattern.captures(&card).unwrap();
-    let card_numbers: HashMap<&str, Vec<u32>> = points_pattern
-        .capture_names()
-        .flatten()
-        .filter_map(|name| {
-            Some((
-                name,
-                caps.name(name)?
-                    .as_str()
-                    .to_string()
-                    .split_whitespace()
-                    .map(|number| number.parse::<u32>().unwrap())
-                    .collect(),
-            ))
-        })
-        .collect();
 
-    let card_number = caps
-        .name("card_number")
-        .unwrap()
-        .as_str()
-        .to_string()
-        .parse::<u32>()
-        .unwrap();
-    let winning_numbers = card_numbers.get("before").unwrap();
-    let numbers = card_numbers.get("after").unwrap();
-    let matches = numbers
-        .into_iter()
-        .filter(|num| winning_numbers.contains(num))
-        .count();
+    return match caps.name("card_number") {
+        Some(x) => {
+            let card_number = x.as_str().to_string().parse::<u32>().unwrap();
+            let card_numbers: HashMap<&str, Vec<u32>> = points_pattern
+                .capture_names()
+                .flatten()
+                .filter_map(|name| {
+                    Some((
+                        name,
+                        caps.name(name)?
+                            .as_str()
+                            .to_string()
+                            .split_whitespace()
+                            .map(|number| number.parse::<u32>().unwrap())
+                            .collect(),
+                    ))
+                })
+                .collect();
+            let winning_numbers = card_numbers.get("before").unwrap();
+            let numbers = card_numbers.get("after").unwrap();
+            let matches = numbers
+                .into_iter()
+                .filter(|num| winning_numbers.contains(num))
+                .count();
 
-    let points = if matches == 0 {
-        0
-    } else {
-        2u32.pow(u32::try_from(matches - 1).unwrap())
+            let points = if matches == 0 {
+                0
+            } else {
+                2u32.pow(u32::try_from(matches - 1).unwrap())
+            };
+            Some(Card {
+                number: (card_number),
+                points: (points),
+            })
+        }
+        _ => None,
     };
-    Card {
-        number: (card_number),
-        points: (points),
-    }
 }
 
 struct Card {
@@ -104,36 +105,36 @@ mod tests {
     fn card_1_has_8_points() {
         let line = "Card 1: 41 48 83 86 17 | 83 86  6 31 17  9 48 53".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(8, card.points);
+        assert_eq!(8, card.unwrap().points);
     }
     #[test]
     fn card_2_has_2_points() {
         let line = "Card 2: 13 32 20 16 61 | 61 30 68 82 17 32 24 19".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(2, card.points);
+        assert_eq!(2, card.unwrap().points);
     }
     #[test]
     fn card_3_has_2_points() {
         let line = "Card 3:  1 21 53 59 44 | 69 82 63 72 16 21 14  1".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(2, card.points);
+        assert_eq!(2, card.unwrap().points);
     }
     #[test]
     fn card_4_has_1_points() {
         let line = "Card 4: 41 92 73 84 69 | 59 84 76 51 58  5 54 83".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(1, card.points);
+        assert_eq!(1, card.unwrap().points);
     }
     #[test]
     fn card_5_has_0_points() {
         let line = "Card 5: 87 83 26 28 32 | 88 30 70 12 93 22 82 36".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(0, card.points);
+        assert_eq!(0, card.unwrap().points);
     }
     #[test]
     fn card_6_has_0_points() {
         let line = "Card 6: 31 18 13 56 72 | 74 77 10 23 35 67 36 11".to_string();
         let card = compute_card_points(&line);
-        assert_eq!(0, card.points);
+        assert_eq!(0, card.unwrap().points);
     }
 }
