@@ -24,7 +24,13 @@ fn solve_day_four_part_one(input_lines: &Vec<String>) -> u32 {
     input_lines
         .iter()
         .filter_map(|c| compute_card_points(c))
-        .map(|card| card.points)
+        .map(|card| {
+            if card.matches == 0 {
+                0
+            } else {
+                2u32.pow(u32::try_from(card.matches - 1).unwrap())
+            }
+        })
         .sum()
 }
 
@@ -57,21 +63,18 @@ fn compute_card_points(card: &String) -> Option<Card> {
                     ))
                 })
                 .collect();
+
             let winning_numbers = card_numbers.get("before").unwrap();
             let numbers = card_numbers.get("after").unwrap();
+
             let matches = numbers
                 .into_iter()
                 .filter(|num| winning_numbers.contains(num))
                 .count();
 
-            let points = if matches == 0 {
-                0
-            } else {
-                2u32.pow(u32::try_from(matches - 1).unwrap())
-            };
             Some(Card {
                 number: (card_number),
-                points: (points),
+                matches: (u32::try_from(matches).unwrap()),
             })
         }
         _ => None,
@@ -80,7 +83,7 @@ fn compute_card_points(card: &String) -> Option<Card> {
 
 struct Card {
     number: u32,
-    points: u32,
+    matches: u32,
 }
 
 #[cfg(test)]
